@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VALUENET — Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #E9EEEC;
+    --bg-grid: #DCE5E2;
+    --panel: #FBFCFB;
+    --panel-raised: #FFFFFF;
+    --ink: #101A18;
+    --ink-dim: #5C6E6A;
+    --ink-faint: #8B9C97;
+    --line: #C7D3CF;
+    --line-strong: #A9BAB5;
+    --accent: #2B6E5B;
+    --accent-ink: #F4FBF8;
+    --led-green: #1E9E5A;
+    --led-green-glow: rgba(30,158,90,.35);
+    --led-red: #C7402B;
+    --led-red-glow: rgba(199,64,43,.30);
+    --led-amber: #C97F1E;
+    --radius: 3px;
+    --shadow-panel: 0 1px 0 rgba(16,26,24,.04), 0 8px 24px -16px rgba(16,26,24,.25);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0/100% 28px,
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0/28px 100%,
+      var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding: 28px 28px 60px;
+  }
+
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  .disp{ font-family:'Space Grotesk', sans-serif; }
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-panel);
+    padding: 18px 22px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 16px; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{
+    width:40px; height:40px; border-radius:50%;
+    background: radial-gradient(circle at 32% 28%, #3d8a72, var(--accent) 65%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 1px 2px rgba(16,26,24,.3);
+    flex-shrink:0;
+  }
+  .brand-mark svg{ width:20px; height:20px; }
+  .brand-text .name{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px;
+    letter-spacing:.02em; line-height:1.1;
+  }
+  .brand-text .tag{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-dim); margin-top:3px;
+  }
+
+  .status-cluster{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+  .online-readout{
+    font-family:'IBM Plex Mono', monospace;
+    display:flex; align-items:center; gap:8px;
+    border:1px solid var(--line-strong);
+    background: var(--panel);
+    padding:7px 12px 7px 10px;
+    border-radius: var(--radius);
+    font-size:12.5px; letter-spacing:.03em;
+  }
+  .online-readout .dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--led-green);
+    box-shadow: 0 0 0 3px var(--led-green-glow);
+  }
+
+  .user-chip{
+    display:flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px;
+    border:1px solid var(--line-strong); padding:7px 12px; border-radius:var(--radius);
+    color: var(--ink-dim);
+  }
+
+  .key-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px; font-weight:500; letter-spacing:.06em; text-transform:uppercase;
+    border:1px solid var(--line-strong);
+    background: var(--panel-raised);
+    color: var(--ink);
+    padding:9px 14px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    box-shadow: 0 1px 0 var(--line-strong);
+    transition: transform .05s ease, box-shadow .05s ease, background .12s ease;
+    display:inline-flex; align-items:center; gap:7px;
+  }
+  .key-btn:hover{ background:#F2F5F4; }
+  .key-btn:active{ transform: translateY(1px); box-shadow:none; }
+  .key-btn.danger{ color:var(--led-red); border-color:#DCC0BA; }
+  .key-btn.danger:hover{ background:#FBF0EE; }
+  .key-btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .key-btn.primary:hover{ background:#255f4f; }
+  .key-btn svg{ width:13px; height:13px; }
+
+  /* ---------- toolbar ---------- */
+  .toolbar{
+    display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;
+  }
+
+  /* ---------- performance panel ---------- */
+  .panel{
+    background: var(--panel-raised);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-panel);
+    margin-bottom: 18px;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-bottom:1px solid var(--line);
+  }
+  .panel-head h2{
+    margin:0; font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase; display:flex; align-items:center; gap:8px;
+  }
+  .panel-head .subtle{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-faint);
+  }
+
+  .gauge-row{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:0;
+  }
+  .gauge-cell{
+    padding:22px 18px;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    border-right:1px solid var(--line);
+  }
+  .gauge-cell:last-child{ border-right:none; }
+  .gauge-label{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-dim); display:flex; align-items:center; gap:6px;
+  }
+
+  .dial{
+    --pct: 0;
+    width:104px; height:104px; border-radius:50%;
+    position:relative;
+    background:
+      radial-gradient(circle, var(--panel-raised) 60%, transparent 61%),
+      conic-gradient(var(--accent) calc(var(--pct)*1%), var(--line) 0);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .dial::before{
+    content:"";
+    position:absolute; inset:-6px; border-radius:50%;
+    background:
+      repeating-conic-gradient(from 0deg, var(--line-strong) 0 1.2deg, transparent 1.2deg 6deg);
+    mask: radial-gradient(circle, transparent 56px, black 57px, black 58px, transparent 59px);
+    -webkit-mask: radial-gradient(circle, transparent 56px, black 57px, black 58px, transparent 59px);
+    opacity:.55;
+  }
+  .dial-read{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:17px; z-index:1; }
+  .dial-sub{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; color:var(--ink-faint); z-index:1; }
+
+  .figure-cell{
+    padding:22px 18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  }
+  .figure-cell .big{
+    font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:20px; color:var(--accent);
+  }
+
+  /* ---------- bot list ---------- */
+  .strip{
+    display:grid;
+    grid-template-columns: 210px 1fr auto;
+    align-items:center;
+    gap: 18px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-raised);
+  }
+  .strip:first-of-type{ border-top:1px solid var(--line); }
+  .strip:last-child{ border-bottom:none; }
+  .strip:hover{ background:#F7F9F8; }
+
+  .strip-id{ display:flex; align-items:center; gap:11px; min-width:0; }
+  .led{
+    width:11px; height:11px; border-radius:50%; flex-shrink:0;
+    background: var(--line-strong);
+    box-shadow:none;
+    transition: all .15s ease;
+  }
+  .led.on{
+    background: var(--led-green);
+    box-shadow: 0 0 0 4px var(--led-green-glow);
+  }
+  .led.stopping{
+    background: var(--led-red);
+    box-shadow: 0 0 0 4px var(--led-red-glow);
+  }
+  .strip-name{ min-width:0; }
+  .strip-name .file{
+    font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:13.5px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .strip-name .state{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-faint); margin-top:2px;
+  }
+  .strip-name .state.is-on{ color: var(--led-green); }
+  .strip-name .state.is-off{ color: var(--led-red); }
+
+  .spark{ display:flex; align-items:center; gap:12px; min-width:0; }
+  .spark svg{ display:block; }
+  .spark .spark-label{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--ink-faint);
+    white-space:nowrap;
+  }
+
+  .strip-actions{ display:flex; gap:6px; flex-wrap:nowrap; }
+  .mini-key{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px; font-weight:500; letter-spacing:.04em; text-transform:uppercase;
+    border:1px solid var(--line-strong);
+    background: var(--panel);
+    color: var(--ink-dim);
+    padding:7px 10px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    transition: transform .05s ease, background .12s, color .12s, border-color .12s;
+  }
+  .mini-key:hover{ background:#EFF3F1; color:var(--ink); }
+  .mini-key:active{ transform: translateY(1px); }
+  .mini-key.run:hover{ color:var(--led-green); border-color:#9fcdb2; }
+  .mini-key.stop:hover{ color:var(--led-red); border-color:#e0b3ab; }
+  .mini-key.del:hover{ color:var(--led-red); border-color:#e0b3ab; }
+
+  footer{
+    max-width:1180px; margin: 26px auto 0; text-align:center;
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; color: var(--ink-faint);
+    letter-spacing:.04em;
+  }
+
+  .wrap{ max-width:1180px; margin:0 auto; }
+
+  @media (max-width: 860px){
+    .gauge-row{ grid-template-columns: repeat(2, 1fr); }
+    .gauge-cell:nth-child(2){ border-right:none; }
+    .gauge-cell{ border-bottom:1px solid var(--line); }
+    .strip{ grid-template-columns: 1fr; row-gap:12px; }
+    .strip-actions{ flex-wrap:wrap; }
+    .spark{ display:none; }
+  }
+
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(16,26,24,.45);
+    display:flex; align-items:center; justify-content:center;
+    z-index:100; padding:20px;
+  }
+  .modal-overlay.hidden{ display:none; }
+  .modal-box{
+    background: var(--panel-raised);
+    border:1px solid var(--line-strong);
+    border-radius: var(--radius);
+    box-shadow: 0 20px 60px -20px rgba(16,26,24,.5);
+    width:100%; max-width:520px;
+    max-height:80vh; display:flex; flex-direction:column;
+  }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px; border-bottom:1px solid var(--line);
+  }
+  .modal-head h3{
+    margin:0; font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:600;
+    letter-spacing:.03em;
+  }
+  .modal-close{
+    border:none; background:none; cursor:pointer; color:var(--ink-dim);
+    font-family:'IBM Plex Mono', monospace; font-size:16px; line-height:1;
+    padding:4px 6px;
+  }
+  .modal-close:hover{ color:var(--ink); }
+  .modal-body{
+    padding:16px 18px; overflow-y:auto;
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink-dim);
+    white-space:pre-wrap; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- masthead -->
+  <div class="masthead">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" stroke="#fff" stroke-width="1.4" fill="none"/><circle cx="12" cy="12" r="2.6" fill="#fff"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="name">VALUENET</div>
+        <div class="tag">Script Console · v2</div>
+      </div>
+    </div>
+    <div class="status-cluster">
+      <div class="online-readout"><span class="dot" id="online-dot"></span><span id="online-count">6 / 7</span> ONLINE</div>
+      <div class="user-chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#5C6E6A" stroke-width="1.6"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" stroke="#5C6E6A" stroke-width="1.6"/></svg>
+        jeya
+      </div>
+      <button class="key-btn danger">Log out</button>
+    </div>
+  </div>
+
+  <!-- toolbar -->
+  <div class="toolbar">
+    <button class="key-btn primary" onclick="runAll()">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 4l14 8-14 8V4z" fill="currentColor"/></svg> Run all
+    </button>
+    <button class="key-btn danger" onclick="stopAll()">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="5" width="14" height="14" fill="currentColor"/></svg> Stop all
+    </button>
+    <button class="key-btn" onclick="viewAllLogs()">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16M4 12h16M4 19h10" stroke="currentColor" stroke-width="1.8"/></svg> All logs
+    </button>
+    <button class="key-btn" onclick="clearAllLogs()">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M8 6V4h8v2M6 6l1 14h10l1-14" stroke="currentColor" stroke-width="1.6"/></svg> Clear logs
+    </button>
+    <button class="key-btn" style="margin-left:auto;" onclick="addScript()">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8"/></svg> Add script
+    </button>
+  </div>
+
+  <!-- performance panel -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Server Performance</h2>
+      <span class="subtle">refreshed 4s ago</span>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-cell">
+        <div class="gauge-label">CPU</div>
+        <div class="dial" style="--pct:51;"><span class="dial-read">51<span class="dial-sub" style="font-size:11px;">%</span></span></div>
+      </div>
+      <div class="gauge-cell">
+        <div class="gauge-label">RAM</div>
+        <div class="dial" style="--pct:76;">
+          <div style="display:flex;flex-direction:column;align-items:center;z-index:1;">
+            <span class="dial-read" style="font-size:14px;">5.9G</span>
+            <span class="dial-sub">of 7.8G</span>
+          </div>
+        </div>
+      </div>
+      <div class="gauge-cell">
+        <div class="gauge-label">Disk</div>
+        <div class="dial" style="--pct:20;">
+          <div style="display:flex;flex-direction:column;align-items:center;z-index:1;">
+            <span class="dial-read" style="font-size:14px;">20G</span>
+            <span class="dial-sub">of 98G</span>
+          </div>
+        </div>
+      </div>
+      <div class="figure-cell">
+        <div class="gauge-label">Load avg (1/5/15)</div>
+        <div class="big">16.84</div>
+        <div class="dial-sub mono">15.46 · 14.87</div>
+        <div class="gauge-label" style="margin-top:10px;">Uptime</div>
+        <div class="mono" style="font-size:13px;">9d 13h 47m</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- bot list -->
+  <div class="panel" id="strip-list">
+    <div class="panel-head">
+      <h2>Running Scripts</h2>
+      <span class="subtle" id="total-count">5 total</span>
+    </div>
+    <!-- rows injected by JS -->
+  </div>
+
+  <footer>VALUENET CONSOLE — LOCAL DASHBOARD PREVIEW</footer>
+</div>
+
+<div class="modal-overlay hidden" id="modal-overlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-title">—</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">—</div>
+  </div>
+</div>
+
+<script>
+  const bots = [
+    { name: 'darryl.js', on: true },
+    { name: 'jeremy.js', on: true },
+    { name: 'mansion.js', on: false },
+    { name: 'richard.js', on: true },
+    { name: 'victor.js', on: true },
+  ];
+
+  function sparkPath(seed, w, h){
+    let pts = [];
+    let v = 0.4 + (seed % 5) * 0.06;
+    for(let i=0;i<20;i++){
+      v += (Math.sin(seed + i*1.3) * 0.12) + (Math.random()-0.5)*0.08;
+      v = Math.max(0.08, Math.min(0.95, v));
+      pts.push([ (i/19)*w, h - v*h ]);
+    }
+    return pts.map((p,i)=> (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  }
+
+  function renderRow(bot, idx){
+    const w=90,h=28;
+    const path = sparkPath(idx*7+3, w, h);
+    const strokeColor = bot.on ? '#2B6E5B' : '#C7D3CF';
+    return `
+    <div class="strip" data-idx="${idx}">
+      <div class="strip-id">
+        <span class="led ${bot.on ? 'on' : ''}"></span>
+        <div class="strip-name">
+          <div class="file">${bot.name}</div>
+          <div class="state ${bot.on ? 'is-on' : 'is-off'}">${bot.on ? 'Running' : 'Stopped'}</div>
+        </div>
+      </div>
+      <div class="spark">
+        <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+          <path d="${path}" fill="none" stroke="${strokeColor}" stroke-width="1.4" opacity="${bot.on?1:0.4}"/>
+        </svg>
+        <span class="spark-label">cpu · 60s</span>
+      </div>
+      <div class="strip-actions">
+        <button class="mini-key run" onclick="toggle(${idx}, true)">Run</button>
+        <button class="mini-key stop" onclick="toggle(${idx}, false)">Stop</button>
+        <button class="mini-key" onclick="viewLogs(${idx})">Logs</button>
+        <button class="mini-key" onclick="editBot(${idx})">Edit</button>
+        <button class="mini-key" onclick="fileInfo(${idx})">File</button>
+        <button class="mini-key" onclick="zipBot(${idx})">Zip</button>
+        <button class="mini-key del" onclick="deleteBot(${idx})">Delete</button>
+      </div>
+    </div>`;
+  }
+
+  function renderAll(){
+    const panel = document.getElementById('strip-list');
+    panel.querySelectorAll('.strip').forEach(n=>n.remove());
+    panel.insertAdjacentHTML('beforeend', bots.map(renderRow).join(''));
+    const onCount = bots.filter(b=>b.on).length;
+    document.getElementById('online-count').textContent = onCount + ' / ' + bots.length;
+    document.getElementById('online-dot').style.background = onCount === bots.length ? '#1E9E5A' : '#C97F1E';
+    document.getElementById('total-count').textContent = bots.length + ' total';
+  }
+
+  function toggle(idx, state){
+    bots[idx].on = state;
+    renderAll();
+  }
+  function runAll(){ bots.forEach(b=>b.on=true); renderAll(); }
+  function stopAll(){ bots.forEach(b=>b.on=false); renderAll(); }
+
+  /* ---------- modal helpers ---------- */
+  function openModal(title, bodyHTML){
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = bodyHTML;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  }
+  function closeModal(){
+    document.getElementById('modal-overlay').classList.add('hidden');
+  }
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+  /* ---------- per-row actions ---------- */
+  function viewLogs(idx){
+    const bot = bots[idx];
+    const lines = [];
+    const now = new Date();
+    for(let i=8;i>=0;i--){
+      const t = new Date(now.getTime() - i*60000);
+      const stamp = t.toTimeString().slice(0,8);
+      if(i===0){
+        lines.push(`[${stamp}] ${bot.name} — status: ${bot.on ? 'running' : 'stopped'}`);
+      } else {
+        lines.push(`[${stamp}] ${bot.name} — heartbeat ok, cpu ${(20+Math.random()*40).toFixed(1)}%`);
+      }
+    }
+    openModal(`Logs — ${bot.name}`, lines.join('\n'));
+  }
+
+  function editBot(idx){
+    const bot = bots[idx];
+    const newName = prompt('Rename script:', bot.name);
+    if(newName && newName.trim() && newName.trim() !== bot.name){
+      bot.name = newName.trim();
+      renderAll();
+    }
+  }
+
+  function fileInfo(idx){
+    const bot = bots[idx];
+    const sizeKb = 4 + (bot.name.length * 3) % 40;
+    openModal(`File — ${bot.name}`, [
+      `path: /var/scripts/${bot.name}`,
+      `size: ${sizeKb} KB`,
+      `status: ${bot.on ? 'running' : 'stopped'}`,
+      `modified: ${new Date().toLocaleString()}`
+    ].join('\n'));
+  }
+
+  function zipBot(idx){
+    const bot = bots[idx];
+    const content = `// placeholder contents for ${bot.name}\n// generated ${new Date().toISOString()}\n`;
+    const blob = new Blob([content], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = bot.name.replace(/\.js$/, '') + '.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function deleteBot(idx){
+    const bot = bots[idx];
+    if(confirm(`Delete ${bot.name}? This cannot be undone.`)){
+      bots.splice(idx, 1);
+      renderAll();
+    }
+  }
+
+  /* ---------- toolbar actions ---------- */
+  function viewAllLogs(){
+    const now = new Date();
+    const lines = bots.map(b => {
+      const stamp = now.toTimeString().slice(0,8);
+      return `[${stamp}] ${b.name} — ${b.on ? 'running' : 'stopped'}`;
+    });
+    openModal('All logs', lines.join('\n') || '(no scripts)');
+  }
+
+  function clearAllLogs(){
+    if(confirm('Clear logs for all scripts?')){
+      openModal('All logs', '(logs cleared)');
+    }
+  }
+
+  function addScript(){
+    const name = prompt('New script name (e.g. task.js):');
+    if(name && name.trim()){
+      bots.push({ name: name.trim(), on: false });
+      renderAll();
+    }
+  }
+
+  renderAll();
+</script>
+</body>
+</html>
